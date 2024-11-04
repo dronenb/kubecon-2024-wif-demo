@@ -1,0 +1,59 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: secretproviderrotation-rolebinding
+  labels:
+    app.kubernetes.io/instance: csi-secrets-store
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: secrets-store-csi-driver
+    app.kubernetes.io/version: 1.4.6
+    app: secrets-store-csi-driver
+    helm.sh/chart: secrets-store-csi-driver-1.4.6
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: secretproviderrotation-role
+subjects:
+  - kind: ServiceAccount
+    name: secrets-store-csi-driver
+    namespace: secrets-store-csi-driver
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: secretprovidersyncing-rolebinding
+  labels:
+    app.kubernetes.io/instance: csi-secrets-store
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: secrets-store-csi-driver
+    app.kubernetes.io/version: 1.4.6
+    app: secrets-store-csi-driver
+    helm.sh/chart: secrets-store-csi-driver-1.4.6
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: secretprovidersyncing-role
+subjects:
+  - kind: ServiceAccount
+    name: secrets-store-csi-driver
+    namespace: secrets-store-csi-driver
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: secretproviderclasses-rolebinding
+  labels:
+    app.kubernetes.io/instance: csi-secrets-store
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: secrets-store-csi-driver
+    app.kubernetes.io/version: 1.4.6
+    app: secrets-store-csi-driver
+    helm.sh/chart: secrets-store-csi-driver-1.4.6
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: secretproviderclasses-role
+subjects:
+  - kind: ServiceAccount
+    name: secrets-store-csi-driver
+    namespace: secrets-store-csi-driver

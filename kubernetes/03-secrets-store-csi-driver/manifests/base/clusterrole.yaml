@@ -1,0 +1,185 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: secretproviderrotation-role
+  labels:
+    app.kubernetes.io/instance: csi-secrets-store
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: secrets-store-csi-driver
+    app.kubernetes.io/version: 1.4.6
+    app: secrets-store-csi-driver
+    helm.sh/chart: secrets-store-csi-driver-1.4.6
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/instance: csi-secrets-store
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: secrets-store-csi-driver
+    app.kubernetes.io/version: 1.4.6
+    app: secrets-store-csi-driver
+    helm.sh/chart: secrets-store-csi-driver-1.4.6
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+  name: secretproviderclasses-admin-role
+rules:
+  - apiGroups:
+      - secrets-store.csi.x-k8s.io
+    resources:
+      - secretproviderclasses
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/instance: csi-secrets-store
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: secrets-store-csi-driver
+    app.kubernetes.io/version: 1.4.6
+    app: secrets-store-csi-driver
+    helm.sh/chart: secrets-store-csi-driver-1.4.6
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+  name: secretproviderclasses-viewer-role
+rules:
+  - apiGroups:
+      - secrets-store.csi.x-k8s.io
+    resources:
+      - secretproviderclasses
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/instance: csi-secrets-store
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: secrets-store-csi-driver
+    app.kubernetes.io/version: 1.4.6
+    app: secrets-store-csi-driver
+    helm.sh/chart: secrets-store-csi-driver-1.4.6
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+  name: secretproviderclasspodstatuses-viewer-role
+rules:
+  - apiGroups:
+      - secrets-store.csi.x-k8s.io
+    resources:
+      - secretproviderclasspodstatuses
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: secretprovidersyncing-role
+  labels:
+    app.kubernetes.io/instance: csi-secrets-store
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: secrets-store-csi-driver
+    app.kubernetes.io/version: 1.4.6
+    app: secrets-store-csi-driver
+    helm.sh/chart: secrets-store-csi-driver-1.4.6
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: secretproviderclasses-role
+  labels:
+    app.kubernetes.io/instance: csi-secrets-store
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: secrets-store-csi-driver
+    app.kubernetes.io/version: 1.4.6
+    app: secrets-store-csi-driver
+    helm.sh/chart: secrets-store-csi-driver-1.4.6
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - secrets-store.csi.x-k8s.io
+    resources:
+      - secretproviderclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - secrets-store.csi.x-k8s.io
+    resources:
+      - secretproviderclasspodstatuses
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - secrets-store.csi.x-k8s.io
+    resources:
+      - secretproviderclasspodstatuses/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - storage.k8s.io
+    resourceNames:
+      - secrets-store.csi.k8s.io
+    resources:
+      - csidrivers
+    verbs:
+      - get
+      - list
+      - watch

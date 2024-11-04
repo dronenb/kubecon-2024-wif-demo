@@ -1,0 +1,6 @@
+---
+# yamllint disable rule:line-length
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: s3-wif-demo

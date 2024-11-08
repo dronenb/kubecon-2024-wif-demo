@@ -92,6 +92,9 @@ gcloud iam workload-identity-pools create-cred-config \
 yq -i e '.spec.template.spec.volumes += [{"name":"gcp-ksa","projected":{"defaultMode":420,"sources":[{"serviceAccountToken":{"audience":"k3s","expirationSeconds":3600,"path":"token"}},{"configMap":{"items":[{"key":"credential-configuration.json","path":"credential-configuration.json"}],"name":"default-creds-config","optional":false}}]}}]' daemonset.yaml
 yq -i e '.spec.template.spec.containers[0].volumeMounts += [{"mountPath":"/var/run/secrets/tokens/gcp-ksa","name":"gcp-ksa","readOnly":true}]' daemonset.yaml
 yq -i e '.spec.template.spec.containers[0].env += [{"name":"GOOGLE_APPLICATION_CREDENTIALS","value":"/var/run/secrets/tokens/gcp-ksa/credential-configuration.json"}]' daemonset.yaml
+# I am using a custom image for GCP secrets store CSI provider so I can use per namespace WIF
+# It's a new feature, not in a release yet: https://github.com/GoogleCloudPlatform/secrets-store-csi-driver-provider-gcp/pull/459
+yq -i e '.spec.template.spec.containers[0].image = "docker.io/dronenb/secrets-store-csi-driver-provider-gcp@sha256:f3d0b978ce19d712514cafba17ba81fbb323379af42c1ebbe10e260d2485fcd6"' daemonset.yaml
 # https://github.com/GoogleCloudPlatform/secrets-store-csi-driver-provider-gcp/blob/main/docs/fleet-wif-notes.md#set-gaia_token_exchange_endpoint-and-appropriate-audience
 yq -i e '.spec.template.spec.containers[0].env += [{"name":"GAIA_TOKEN_EXCHANGE_ENDPOINT","value":"https://sts.googleapis.com/v1/token"}]' daemonset.yaml
 yq -i e '.spec.template.spec.containers[0].args += ["-v=5"]' daemonset.yaml
@@ -112,3 +115,23 @@ EOF
 # Format YAML
 prettier . --write
 popd > /dev/null || exit 1
+
+mkdir -p manifests/components/azure-provider
+pushd manifests/components/azure-provider > /dev/null || exit 1
+
+export VERSION="1.5.6"
+helm repo add csi-secrets-store-provider-azure https://azure.github.io/secrets-store-csi-driver-provider-azure/charts
+helm repo update
+helm template csi-secrets-store-provider-azure csi-secrets-store-provider-azure/csi-secrets-store-provider-azure \
+    --include-crds \
+    --version "${VERSION}" \
+    --namespace "${NAMESPACE}" \
+    --set secrets-store-csi-driver.syncSecret.enabled=true \
+    --set linux.providersDir=/etc/kubernetes/secrets-store-csi-providers \
+    --set secrets-store-csi-driver.install=false | \
+    yq --no-colors --prettyPrint '... comments=""' | \
+    kubectl-slice -o . --template "{{ .kind | lower }}.yaml"
+
+yq -i e '.spec.template.spec.containers[].securityContext += {"privileged" : true,"allowPrivilegeEscalation":true}' daemonset.yaml
+
+kustomize create --autodetect --namespace "${NAMESPACE}"

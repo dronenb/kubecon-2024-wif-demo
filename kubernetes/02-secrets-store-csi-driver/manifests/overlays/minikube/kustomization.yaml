@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  - ../../components/aws-provider
+  - ../../components/azure-provider
+  - ../../components/gcp-provider
+  - ./secretproviderclass.yaml
+  - serviceaccount.yaml
+  - pod.yaml
+patches:
+  - target:
+      kind: CSIDriver
+      name: secrets-store.csi.k8s.io
+    patch: |-
+      - op: add
+        path: /spec/tokenRequests
+        value:
+          - audience: "//iam.googleapis.com/projects/576089806637/locations/global/workloadIdentityPools/dronenb-kubecon-2024-demo/providers/kubecon-2024-demo"
+            expirationSeconds: 3600
+          - audience: "api://AzureADTokenExchange"
+            expirationSeconds: 3600
+          - audience: "sts.amazonaws.com"
+            expirationSeconds: 3600
+  - target:
+      kind: DaemonSet
+      name: csi-secrets-store-provider-gcp
+    # Patch in custom image for pod identity support: https://github.com/GoogleCloudPlatform/secrets-store-csi-driver-provider-gcp/pull/459
+    # This hasn't made it in a release yet
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: docker.io/dronenb/secrets-store-csi-driver-provider-gcp:latest

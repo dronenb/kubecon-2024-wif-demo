@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mypod
+  name: secrets-demo
   namespace: default
 spec:
   serviceAccount: default

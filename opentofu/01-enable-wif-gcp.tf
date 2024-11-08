@@ -17,7 +17,7 @@ resource "google_iam_workload_identity_pool_provider" "kubecon_demo" {
   oidc {
     issuer_uri        = "https://storage.googleapis.com/dronenb-kubecon-2024-demo"
     allowed_audiences = [
-      "https://iam.googleapis.com/projects/${data.google_project.kubecon_demo.number}/locations/global/workloadIdentityPools/dronenb-kubecon-2024-demo/providers/kubecon-2024-demo",
+      "//iam.googleapis.com/projects/${data.google_project.kubecon_demo.number}/locations/global/workloadIdentityPools/dronenb-kubecon-2024-demo/providers/kubecon-2024-demo",
     ]
   }
 }

@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: csi-secrets-store-provider-azure
+  namespace: secrets-store-csi-driver
+  labels:
+    app.kubernetes.io/instance: csi-secrets-store-provider-azure
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/version: 1.5.3
+    helm.sh/chart: csi-secrets-store-provider-azure-1.5.6
+    app.kubernetes.io/name: csi-secrets-store-provider-azure
+    app: csi-secrets-store-provider-azure
+spec:
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: csi-secrets-store-provider-azure
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: csi-secrets-store-provider-azure
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: 1.5.3
+        helm.sh/chart: csi-secrets-store-provider-azure-1.5.6
+        app.kubernetes.io/name: csi-secrets-store-provider-azure
+        app: csi-secrets-store-provider-azure
+    spec:
+      serviceAccountName: csi-secrets-store-provider-azure
+      hostNetwork: true
+      containers:
+        - name: provider-azure-installer
+          image: mcr.microsoft.com/oss/azure/secrets-store/provider-azure:v1.5.3
+          imagePullPolicy: IfNotPresent
+          args:
+            - --endpoint=unix:///provider/azure.sock
+            - --construct-pem-chain=true
+            - --healthz-port=8989
+            - --healthz-path=/healthz
+            - --healthz-timeout=5s
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8989
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            timeoutSeconds: 10
+            periodSeconds: 30
+          resources:
+            limits:
+              cpu: 50m
+              memory: 100Mi
+            requests:
+              cpu: 50m
+              memory: 100Mi
+          ports:
+            - containerPort: 8898
+              name: metrics
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: true
+            readOnlyRootFilesystem: true
+            runAsUser: 0
+            capabilities:
+              drop:
+                - ALL
+            privileged: true
+          volumeMounts:
+            - name: provider-vol
+              mountPath: /provider
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: type
+                    operator: NotIn
+                    values:
+                      - virtual-kubelet
+      volumes:
+        - name: provider-vol
+          hostPath:
+            path: /etc/kubernetes/secrets-store-csi-providers
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - operator: Exists

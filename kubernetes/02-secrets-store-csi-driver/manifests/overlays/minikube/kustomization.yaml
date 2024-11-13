@@ -7,7 +7,6 @@ resources:
   - ../../components/gcp-provider
   - ./secretproviderclass.yaml
   - serviceaccount.yaml
-  - pod.yaml
 patches:
   - target:
       kind: CSIDriver
